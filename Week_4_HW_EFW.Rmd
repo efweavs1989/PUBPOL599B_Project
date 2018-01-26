@@ -1,0 +1,190 @@
+---
+title: "Homework #2"
+output: html_notebook
+---
+
+Get dataset with region data from GitHub:
+```{r}
+linkRegions= 'https://github.com/efweavs1989/PUBPOL599B_DATA/blob/master/hh_sec_a.csv?raw=true'
+
+region=read.csv(linkRegions)
+region
+```
+
+Get dataset with Section I data from Github:
+```{r}
+i_link= 'https://github.com/efweavs1989/PUBPOL599B_DATA/raw/master/hh_sec_i.csv'
+i_data= read.csv(i_link)
+```
+
+Get dataset with Section Q1 data from Github:
+```{r}
+q1_link= 'https://github.com/efweavs1989/PUBPOL599B_DATA/raw/master/hh_sec_q1.csv'
+q1_data= read.csv(q1_link)
+```
+
+View names to identify which variables we need to keep and keep household ID, region number, and region name:
+```{r}
+names(region)
+```
+```{r}
+region=region[,c("y4_hhid","hh_a01_1", "hh_a01_2")]
+```
+
+View names for Section I data to determine which we need to keep:
+```{r}
+names(i_data)
+```
+
+Select variables from Section I that want to anlayze. These are:
+
+"hh_i05": In the past year, how much have you paid on repairs to your dwelling? (TSH)
+"hh_i06": In the past year, how much have you paid in improvements to your home (excluding any purchases listed in previous question)? (TSH)
+"hh_i08": The walls of the main dwelling are predominantly made of what materials? (See questionnaire for options)
+"hh_i09": The roof of the main dwelling is predominantly made of what materials? (See questionnaire for options)
+"hh_i10": The floor of the main dwelling is predominantly made of what materials? (See questionnaire for options)
+```{r}
+i_data=i_data[,c("y4_hhid","hh_i05","hh_i06","hh_i08","hh_i09","hh_i10")]
+```
+
+View names from Section Q1 data to determine which names we need to keep:
+```{r}
+names(q1_data)
+```
+
+Select variables from Section Q that want to anlayze. These are:
+
+"hh_q01_1": Did you or anyone in your household use M-PESA to transfer money over the last 12 months
+"hh_q01_2": Did you or anyone in your household use EZY PESA to transfer money over the last 12 months
+"hh_q01_3": Did you or anyone in your household use Airtel Money to transfer money over the last 12 months
+"hh_q01_4": Did you or anyone in your household use TIGO PESA to transfer money over the last 12 months
+
+```{r}
+q1_data=q1_data[,c("y4_hhid","hh_q01_1","hh_q01_2","hh_q01_3","hh_q01_4")]
+```
+
+Merge data sets. Need to merge one by one. 
+
+```{r}
+i_reg=merge(region,i_data)
+projectData=merge(i_reg,q1_data)
+```
+
+Check the data type so know how to aggregate the data.
+
+```{r}
+str(projectData)
+```
+
+My primary variable is how much each household paid for improvements to their home in the past year (hh_i06). I start by finding the median of this variables for each region:
+
+```{r}
+aggregate(cbind(hh_i06) ~ hh_a01_1, data=projectData, FUN=median)
+```
+To find better results I restrict my sample to households where improvments are made to the home (hh_i06 does not equal zero).
+
+```{r}
+projectData_res=projectData[projectData$hh_i06!=0,]
+projectData_res
+```
+
+Check the data type now that we have restricted the data:
+
+```{r}
+str(projectData_res)
+```
+
+Now find the median of the improvements for each region:
+
+```{r}
+(median_improvements=aggregate(cbind(hh_i06) ~ hh_a01_1, data=projectData_res, FUN=median))
+```
+
+And the mean of the improvements for each region:
+```{r}
+(mean_improvements=aggregate(cbind(hh_i06) ~ hh_a01_1, data=projectData_res, FUN=mean))
+```
+
+Now find the standard deviation:
+```{r}
+sd(median_improvements$hh_i06,na.rm = T)
+
+```
+
+and the coefficient of variation:
+```{r}
+sd(median_improvements$hh_i06,na.rm = T)/mean(median_improvements$hh_i06,na.rm = T)
+```
+
+Skewness:
+```{r}
+library(moments)
+skewness(median_improvements$hh_i06,na.rm = T)
+```
+
+Kurtosis:
+```{r}
+kurtosis(median_improvements$hh_i06,na.rm = T)
+```
+
+Now plot:
+```{r}
+library(ggplot2)
+# keeping non missing:
+data=median_improvements[is.finite(median_improvements$hh_i06),]
+#
+# selecting a var:
+var=data$hh_i06
+#
+# saving mean and sd:
+mnVar=mean(var,na.rm = T)
+sdVar=sd(var,na.rm = T)
+#
+#plotting
+base = ggplot(data, aes(x=var))
+hist = base + geom_histogram(fill="green", 
+                             color='grey',
+                          aes(y=..density..))
+#
+histAndNormal = hist + stat_function(fun=dnorm,
+                                     color="red",
+                                     args=list(mean=mnVar,sd=sdVar))
+#
+histAndNormal
+```
+
+Bivariate analysis:
+I will explore hh_i06 in relation to hh_i05, another numeric variable that looks at how much a household spends on repairs.
+
+Compute the correlation:
+```{r}
+res <- cor(projectData_res[,c(4:5)],use='complete.obs')
+round(res, 2)
+```
+
+Compute correlation again with hh_i06 not restricted:
+```{r}
+res <- cor(projectData[,c(4:5)],use='complete.obs')
+round(res, 2)
+```
+
+Visual representation of the correlation:
+```{r}
+library(car)
+scatterplotMatrix(projectData_res[,c(4:5)], 
+   main="Simple Scatterplot Matrix")
+```
+
+Next explore the relationship between my main variable and "hh_i10": The floor of the main dwelling is predominantly made of what materials? (See questionnaire for options)
+
+```{r}
+tapply(projectData_res$hh_i06, list(hh_i10=projectData_res$hh_i10), mean) 
+```
+
+```{r}
+projectData_res=projectData_res[complete.cases(projectData_res),] #excluding NA
+p <- ggplot(projectData_res, aes(hh_i10,hh_i06))
+
+p + geom_boxplot() + labs(title="What Floor Materials do Households use that make improvements to their household?")
+```
+
