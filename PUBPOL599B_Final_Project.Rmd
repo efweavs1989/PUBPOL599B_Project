@@ -168,14 +168,14 @@ library(ggplot2)
 data=projectData[is.finite(projectData$Value_of_Improvements),]
 #
 # selecting a var:
-improvements=data$Value_of_Improvements
+var=data$Value_of_Improvements
 #
 # saving mean and sd:
-mnVar=mean(improvements,na.rm = T)
-sdVar=sd(improvements,na.rm = T)
+mnVar=mean(var,na.rm = T)
+sdVar=sd(var,na.rm = T)
 #
 #plotting
-base = ggplot(data, aes(x=improvements))
+base = ggplot(data, aes(x=var))
 hist = base + geom_histogram(fill="green", 
                              color='grey',
                           aes(y=..density..))
