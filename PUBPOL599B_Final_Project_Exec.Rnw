@@ -17,22 +17,11 @@
 \maketitle
 
 \section{Introduction}\label{intro}
-This is my intro to my great paper, I will explain the cool things I can do with my new `computational thinking' powers combined with some Latex.
-
-This is my nice intro to my great paper, 
-I will explain the cool things I can do with my new `computational thinking' powers combined with some Latex.
-
-
-
-This is my nice intro to my great paper, 
-I will explain the cool things 
-I can do with my new `computational thinking' 
-powers
-combined with some Latex.
+In this section give a brief introduction to LSMS-ISA, these variables and background to why they are important. 
 
 \section{Explaining Labels}\label{outline}
 
-Sections may use a label\footnote{In fact, you can have a label wherever you think a future reference to that content might be needed.}. This label is needed for referencing. For example the next section has label \emph{datas}, so you can reference it by writing: As we see in section \ref{datas}.
+Sections may use a label This label is needed for referencing. For example the next section has label \emph{datas}, so you can reference it by writing: As we see in section \ref{datas}.
 
 \section{Data analysis}\label{datas}
 
