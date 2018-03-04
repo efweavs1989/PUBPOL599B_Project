@@ -24,6 +24,17 @@ In this section give a brief introduction to LSMS-ISA, these variables and backg
 Sections may use a label This label is needed for referencing. For example the next section has label \emph{datas}, so you can reference it by writing: As we see in section \ref{datas}.
 
 \section{Data analysis}\label{datas}
+<<echo=FALSE>>=
+#pull in data
+linkRegions= 'https://github.com/efweavs1989/PUBPOL599B_DATA/blob/master/hh_sec_a.csv?raw=true'
+region=read.csv(linkRegions)
+
+i_link= 'https://github.com/efweavs1989/PUBPOL599B_DATA/raw/master/hh_sec_i.csv'
+i_data= read.csv(i_link)
+
+q1_link= 'https://github.com/efweavs1989/PUBPOL599B_DATA/raw/master/hh_sec_q1.csv'
+q1_data= read.csv(q1_link)
+@
 
 Here you can explain how to get the data:
 
