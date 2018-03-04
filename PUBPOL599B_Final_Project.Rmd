@@ -1,6 +1,7 @@
 ---
-##Write a heading of some sort and info with background and links
-
+# PUBPOL599B Final Project
+## Emma Weaver
+### March 6, 2018
 ---
 
 Get dataset with region data from GitHub:
@@ -99,15 +100,13 @@ names(projectData)
 
 The primary variable of interest is the value of improvements (how much each household paid for improvements to their home in the past year). 
 
-First, aggregate aggregate all variables that can be aggregated by the mean:
+First, aggregate all variables that can be aggregated by the mean:
 ```{r,eval=TRUE}
 (mean_variables=aggregate(cbind(Value_of_Repairs, Value_of_Improvements, MPesa_Use, Ezy_Pesa_Use, Airtel_Use, Tigo_Pesa_Use) ~ Region_Code, data=projectData, FUN=mean))
 ```
 The mobile money use is measured as either 1 = do not use this service, or 2 = use this service.
 
 Now aggregate those variables that need to be aggregated by mode. To do this we need to first create a function which calculates the mode of each variable: 
-
-Create mode function from other code
 ```{r,eval=TRUE}
 getMode=function(aColumn){
   freqTable=table(aColumn)
@@ -116,7 +115,7 @@ getMode=function(aColumn){
 }
 ```
 
-
+Now that we have created this function use it to aggregate all categorical variables:
 ```{r,eval=TRUE}
 (mode_variables=aggregate(cbind(Wall_Material, Roof_Material, Floor_Material) ~ Region_Code, data=projectData, FUN=getMode))
 ```
@@ -126,8 +125,7 @@ Now merge these two aggregated files together:
 projectData=merge(mean_variables,mode_variables)
 ```
 
-Region code currently skips from 25 to 51. Revise this number below:
-
+The region code currently skips from 25 to 51. Revise this numbering below:
 ```{r}
 projectData$Region_Code=gsub(51, 26, projectData$Region_Code)
 projectData$Region_Code=gsub(52, 27, projectData$Region_Code)
@@ -136,12 +134,12 @@ projectData$Region_Code=gsub(54, 29, projectData$Region_Code)
 projectData$Region_Code=gsub(55, 30, projectData$Region_Code)
 projectData$Region_Code
 ```
+
 And change this variable back to numeric:
 ```{r}
 projectData$Region_Code=as.numeric(projectData$Region_Code)
 projectData$Region_Code
 ```
-
 
 Returning to our primary variable of interest, we will begin to perform univariate analysis to further explore this variable. 
 
@@ -157,7 +155,6 @@ library(moments)
 skewness(projectData$Value_of_Improvements,na.rm = T)
 ```
 
-Note to Emma: Look into what data you need for Kurtosis, what it represents, etc.
 Kurtosis:
 ```{r,eval=TRUE}
 kurtosis(projectData$Value_of_Improvements,na.rm = T)
@@ -171,14 +168,14 @@ library(ggplot2)
 data=projectData[is.finite(projectData$Value_of_Improvements),]
 #
 # selecting a var:
-var=data$Value_of_Improvements
+improvements=data$Value_of_Improvements
 #
 # saving mean and sd:
-mnVar=mean(var,na.rm = T)
-sdVar=sd(var,na.rm = T)
+mnVar=mean(improvements,na.rm = T)
+sdVar=sd(improvements,na.rm = T)
 #
 #plotting
-base = ggplot(data, aes(x=var))
+base = ggplot(data, aes(x=improvements))
 hist = base + geom_histogram(fill="green", 
                              color='grey',
                           aes(y=..density..))
@@ -197,33 +194,22 @@ I will explore the relationship between the amount spent on improvements and sec
 str(projectData)
 ```
 
-Compute the correlation between the value of improvments and value of repairs:
+Compute the correlation between the value of improvments and other numerical variables:
 ```{r,eval=TRUE}
-res <- cor(projectData[,c(2,3)],use='complete.obs')
+res <- cor(projectData[,c(2:7)],use='complete.obs')
 round(res, 2)
 ```
 
-These variables are weakly correlated. Below is a visual representation of the correlation between improvements and repairs:
+Below is a visual representation of the correlation between value of improvments, value of repairs and use of one mobile money platform (MPesa):
 ```{r,eval=TRUE}
 library(car)
-scatterplotMatrix(projectData[,c(2,3)], 
+scatterplotMatrix(projectData[,c(2:4)], 
    main="Simple Scatterplot Matrix")
-#For Emma: Can I change the variable names in this plot? See class notes
 ```
 
 Next we should explore the relationship between some of our categorical variables and our main numeric variable of interest, the value of improvments.
 
-Let's start by looking at the relationship between the value of improvements and MPesa use:
-Note for Emma: Should this be a box plot???
-```{r}
-projectData=projectData[complete.cases(projectData),] 
-p <- ggplot(projectData, aes(MPesa_Use,Value_of_Improvements))
-
-p + geom_boxplot() + labs(title="The Value of Improvements vs. MPesa Use")
-```
-
-Let's also look at the relationship between the value of improvements and roof material
-For Emma: Need to rename this, use actual names of what 1 & 4 represent
+Let's start by looking at at the relationship between the value of improvements and roof material
 ```{r}
 projectData=projectData[complete.cases(projectData),] 
 p <- ggplot(projectData, aes(Roof_Material,Value_of_Improvements))
