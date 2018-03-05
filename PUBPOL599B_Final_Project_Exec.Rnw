@@ -3,10 +3,6 @@
 \title{PUBPOL599B Final Project}
 \author{
         Emma Weaver\\
-        Evans School of Public Policy and Governance\\
-        University of Washington\\
-        Seattle, WA 98115, \underline{United States}\\
-        \texttt{emmaw33@uw.edu}
 }
 \date{\today}
 
@@ -19,12 +15,8 @@
 \section{Introduction}\label{intro}
 In this section give a brief introduction to LSMS-ISA, these variables and background to why they are important. 
 
-\section{Explaining Labels}\label{outline}
-
-Sections may use a label This label is needed for referencing. For example the next section has label \emph{datas}, so you can reference it by writing: As we see in section \ref{datas}.
-
 \section{Data analysis}\label{datas}
-<<echo=FALSE>>=
+<<echo=FALSE, results=hide>>=
 #pull in data
 linkRegions= 'https://github.com/efweavs1989/PUBPOL599B_DATA/blob/master/hh_sec_a.csv?raw=true'
 region=read.csv(linkRegions)
@@ -34,94 +26,140 @@ i_data= read.csv(i_link)
 
 q1_link= 'https://github.com/efweavs1989/PUBPOL599B_DATA/raw/master/hh_sec_q1.csv'
 q1_data= read.csv(q1_link)
+
+region=region[,c("y4_hhid","hh_a01_1", "hh_a01_2")]
+i_data=i_data[,c("y4_hhid","hh_i05","hh_i06","hh_i08","hh_i09","hh_i10")]
+q1_data=q1_data[,c("y4_hhid","hh_q01_1","hh_q01_2","hh_q01_3","hh_q01_4")]
+
+i_reg=merge(region,i_data)
+projectData=merge(i_reg,q1_data)
+
+names(projectData)=gsub("y4_hhid", "Household_ID", names(projectData))
+names(projectData)=gsub("hh_a01_1", "Region_Code", names(projectData))
+names(projectData)=gsub("hh_a01_2", "Region_Name", names(projectData))
+names(projectData)=gsub("hh_i05", "Value_of_Repairs", names(projectData))
+names(projectData)=gsub("hh_i06", "Value_of_Improvements", names(projectData))
+names(projectData)=gsub("hh_i08", "Wall_Material", names(projectData))
+names(projectData)=gsub("hh_i09", "Roof_Material", names(projectData))
+names(projectData)=gsub("hh_i10", "Floor_Material", names(projectData))
+names(projectData)=gsub("hh_q01_1", "MPesa_Use", names(projectData))
+names(projectData)=gsub("hh_q01_2", "Ezy_Pesa_Use", names(projectData))
+names(projectData)=gsub("hh_q01_3", "Airtel_Use", names(projectData))
+names(projectData)=gsub("hh_q01_4", "Tigo_Pesa_Use", names(projectData))
+
+(mean_variables=aggregate(cbind(Value_of_Repairs, Value_of_Improvements, MPesa_Use, Ezy_Pesa_Use, Airtel_Use, Tigo_Pesa_Use) ~ Region_Code, data=projectData, FUN=mean))
+
+getMode=function(aColumn){
+  freqTable=table(aColumn)
+  maxFrequency=max(freqTable)
+  names(freqTable[freqTable==maxFrequency])[1]
+}
+
+mode_variables=aggregate(cbind(Wall_Material, Roof_Material, Floor_Material) ~ Region_Code, data=projectData, FUN=getMode)
+
+projectData=merge(mean_variables,mode_variables)
+
+projectData$Region_Code=gsub(51, 26, projectData$Region_Code)
+projectData$Region_Code=gsub(52, 27, projectData$Region_Code)
+projectData$Region_Code=gsub(53, 28, projectData$Region_Code)
+projectData$Region_Code=gsub(54, 29, projectData$Region_Code)
+projectData$Region_Code=gsub(55, 30, projectData$Region_Code)
+projectData$Region_Code
+
+projectData$Region_Code=as.numeric(projectData$Region_Code)
 @
 
-Here you can explain how to get the data:
-
-<<gettingData, echo=TRUE, eval=TRUE>>=
-states=read.csv("https://goo.gl/So48s5")
+  The primary metric of interest is the amount a household spent on improvements to the home in the past year, beyond what was spent on repairs. By region, the average amount spent on improvements to the home is 24,232 TSH. The below includes this information, as well as the minimum value, maximum value and median. 
+  
+<<echo=false>>=
+summary(projectData$Value_of_Improvements)
 @
 
-\subsection{Exploration}\label{eda}
-
-Here, I start exploring the data. The first step is to know what variables I have, and in what scale they are:
-
-<<verifying, echo=FALSE,eval=TRUE>>=
-str(states, width = 60, strict.width = "cut")
+\section{Mapping the Data}\label{map}
+  Research suggests that the use of mobile money platforms increases financial inclusion (cite). The LSMS-ISA survey asks households if they have used various mobile money platforms to transfer money in the last 12 months. Given that the use of mobile money is thought to increase financial inclusion, it would be interesting to explore the relationship between the use of mobile money, the amount of money spent on repairs to the home, and the amount beyond this spent on improvements. One way to visualize this data is through mapping the data by region. These maps show that there is overlap among regions which spend a lot on improvements to the home, regions which spend a lot on repairs to the home, and regions which use mobile money. However, the relationships are not necessarily consistent.
+  
+<<echo=false, results=hide>>=
+compressedMap= "https://github.com/efweavs1989/PUBPOL599B_Project/raw/master/TZA_adm_shp.zip"
+library(utils)
+temp=tempfile()
+download.file(compressedMap, temp)
+unzip(temp)
+library(rgdal)
+TZMap <- rgdal::readOGR("TZA_adm1.shp",stringsAsFactors=F)
+TZMap=TZMap[,c('ID_1')]
+TZMap$ID_1=as.numeric(TZMap$ID_1)
+contribTZmap=merge(TZMap,projectData, by.x='ID_1', by.y='Region_Code',all.x=F)
+library(RColorBrewer)
+library(classInt)
 @
-
-% bullets
-
-A next step demands:
-\begin{itemize}
-  \item Knowing the \emph{central} and \emph{dispersion} values.
-  \item Visualizing the variables of interest.
-\end{itemize}
-
-Except for the column \emph{state}, we can compute the centrality and spread measures for the other variables in the data. I will do that in Table \ref{measures} in the next page.
-
-<<meanspread,echo=FALSE,results=tex,eval=TRUE>>=
-# notice "results=tex"
-#install.packages("stargazer")
-library(stargazer)
-stargazer(states[,-c(1,8)],title = "Mean and Spread values", label = "measures")
-@
-
-As you saw, my Table \ref{measures} is nice. As you, saw the mean of the variable \emph{satMean} is \Sexpr{mean(states$satMean, na.rm = T)}. Now let's use a boxplot to explore location:
-
-%%%%%%%
-% figure 
 
 \begin{figure}[h]
 \centering
-<<location,echo=FALSE, fig=TRUE,eval=TRUE,height=4.6>>=
-# notice "fig=TRUE"
+<<location,echo=FALSE, fig=TRUE,eval=TRUE,width=20, height=6>>=
 par(mfrow=c(1,3))
-boxplot(states$satMean)
-boxplot(states$satDemand)
-boxplot(states$k12ExpenditurePupil)
+varToPLot=projectData$Value_of_Improvements
+numberOfClasses = 5
+colorForScale='YlGnBu'
+colors = brewer.pal(numberOfClasses, colorForScale)
+intervals <- classIntervals(varToPLot, numberOfClasses, 
+                            style = "quantile",
+                            dataPrecision=2)
+colorPallette <- findColours(intervals, colors)
+legendText="value of improvements"
+shrinkLegend=0.4
+title="Amount HH Spent on Improvements to the Home"
+
+plot(contribTZmap,col='purple',main=title)
+plot(contribTZmap, col = colorPallette,border='grey',add=T)
+
+legend('topright', legend = names(attr(colorPallette, "table")), 
+       fill = attr(colorPallette, "palette"), cex = shrinkLegend, 
+       bty = "n",
+       title=legendText)
+varToPLot=projectData$Value_of_Repairs
+numberOfClasses = 5
+colorForScale='YlGnBu'
+colors = brewer.pal(numberOfClasses, colorForScale)
+intervals <- classIntervals(varToPLot, numberOfClasses, 
+                            style = "quantile",
+                            dataPrecision=2)
+colorPallette <- findColours(intervals, colors)
+legendText="value of repairs"
+shrinkLegend=0.4
+title="Amount HH Spent on Repairs to the Home"
+
+plot(contribTZmap,col='purple',main=title)
+plot(contribTZmap, col = colorPallette,border='grey',add=T)
+
+legend('topright', legend = names(attr(colorPallette, "table")), 
+       fill = attr(colorPallette, "palette"), cex = shrinkLegend, 
+       bty = "n",
+       title=legendText)
+varToPLot=projectData$MPesa_Use
+numberOfClasses = 5
+colorForScale='YlGnBu'
+colors = brewer.pal(numberOfClasses, colorForScale)
+intervals <- classIntervals(varToPLot, numberOfClasses, 
+                            style = "quantile",
+                            dataPrecision=2)
+colorPallette <- findColours(intervals, colors)
+legendText="MPesa Use"
+shrinkLegend=0.4
+title="Does the HH Use Mobile Money (MPesa)"
+
+plot(contribTZmap,col='purple',main=title)
+plot(contribTZmap, col = colorPallette,border='grey',add=T)
+
+legend('topright', legend = names(attr(colorPallette, "table")), 
+       fill = attr(colorPallette, "palette"), cex = shrinkLegend, 
+       bty = "n",
+       title=legendText)
 @
-\caption{Location of values}
-\label{plot_boxplots}
+\caption{Improvements to the Home, Repairs to the Home and Mobile Money Use by Region}
 \end{figure}
 
-
-As we have a categorical variable, we could create a frequency table:
-
-<<tableCat2,echo=FALSE, results=tex,eval=TRUE>>=
-tableF=data.frame(table(states$region),row.names = NULL)
-names(tableF)=c("Region", 'Frequency')
-stargazer(tableF,title = "Distribution of Region",  
-          label = "table_region",rownames=FALSE,summary = FALSE)
-@
+\section{Conclusion}\
 
 
-
-\subsection{Modeling}\label{model}
-
-Here, I propose that the amount of money spent for child per state in the US has an effect on the mean average pupils in a state get in SAT:
-<<reg1,echo=TRUE,eval=TRUE>>=
-reg1=lm(satMean~k12ExpenditurePupil, data = states)
-@
-
-Here, I modify the previous model; while I insist that the amount of money spent for child per state in the US has an effect on the mean average pupils in a state get in SAT; I will control the effect the demand per state (as demand were equal accross states). Then,
-
-Model 2: 
-<<reg2,echo=TRUE,eval=TRUE>>=
-reg2=lm(satMean~k12ExpenditurePupil+satDemand, data = states)
-@
-
-I have the results, but have not display them, let's do it in the coming subsection
-%%%%%%%
-%% better way coming here!!!!!
-
-\subsection{Modeling nicely}\label{modelnice}
-
-What about this:
-
-<<models2,results=tex, echo=false,eval=TRUE>>=
-stargazer(reg1,reg2,covariate.labels=c("Dollars per Student", "Share taking SAT"),title = "Regression Models", label = "regmods")
-@
-
-
+  
 \end{document}

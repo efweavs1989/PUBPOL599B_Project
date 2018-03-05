@@ -143,9 +143,14 @@ projectData$Region_Code
 
 Returning to our primary variable of interest, we will begin to perform univariate analysis to further explore this variable. 
 
-First, find the standard deviation:
+First, look at the summary statistics:
+```{r}
+summary(projectData$Value_of_Improvements)
+```
+
+Now, find the standard deviation:
 ```{r,eval=TRUE}
-sd(mean_variables$Value_of_Improvements,na.rm = T)
+sd(projectData$Value_of_Improvements,na.rm = T)
 
 ```
 
@@ -160,8 +165,7 @@ Kurtosis:
 kurtosis(projectData$Value_of_Improvements,na.rm = T)
 ```
 
-Note to Emma: Go through and name these better, make sure you know what you're looking at
-Now plot:
+Now create a histogram:
 ```{r,eval=TRUE}
 library(ggplot2)
 # keeping non missing:
@@ -209,28 +213,52 @@ scatterplotMatrix(projectData[,c(2:4)],
 
 Next we should explore the relationship between some of our categorical variables and our main numeric variable of interest, the value of improvments.
 
-Let's start by looking at at the relationship between the value of improvements and roof material
-```{r}
-projectData=projectData[complete.cases(projectData),] 
-p <- ggplot(projectData, aes(Roof_Material,Value_of_Improvements))
+Let's start by looking at at the relationship between the value of improvements and roof material. First, create a new variable which includes the names of the roofing material. 
 
-p + geom_boxplot() + labs(title="The Value of Improvements vs. Roof Material")
+```{r}
+projectData$Roof_Material_Name[projectData$Roof_Material==1] <- "Grass, Leaves, Bamboo"
+projectData$Roof_Material_Name[projectData$Roof_Material==4] <- "Metal Sheets"
 ```
 
-And wall material:
+Next, create a box plot:
 ```{r}
 projectData=projectData[complete.cases(projectData),] 
-p <- ggplot(projectData, aes(Wall_Material,Value_of_Improvements))
+p <- ggplot(projectData, aes(Roof_Material_Name,Value_of_Improvements))
 
-p + geom_boxplot() + labs(title="The Value of Improvements vs. Wall Material")
+p + geom_boxplot() + labs(title="The Value of Improvements by Roof Material") + scale_x_discrete(name = "Roof Material") +
+        scale_y_continuous(name = "Value of Improvements\nMade to the Home")
 ```
 
-And floor material:
+Now create a new variable with the names of the wall material:
+```{r}
+projectData$Wall_Material_Name[projectData$Wall_Material==2] <- "Poles & Mud/Mud & Stones"
+projectData$Wall_Material_Name[projectData$Wall_Material==4] <- "Mud Bricks"
+projectData$Wall_Material_Name[projectData$Wall_Material==5] <- "Baked/Burnt Bricks"
+projectData$Wall_Material_Name[projectData$Wall_Material==6] <- "Concrete, Cement, Stones"
+```
+
+And create a box plot:
 ```{r}
 projectData=projectData[complete.cases(projectData),] 
-p <- ggplot(projectData, aes(Floor_Material,Value_of_Improvements))
+p <- ggplot(projectData, aes(Wall_Material_Name,Value_of_Improvements))
 
-p + geom_boxplot() + labs(title="The Value of Improvements vs. Floor Material")
+p + geom_boxplot() + labs(title="The Value of Improvements by Wall Material")+scale_x_discrete(name = "Wall Material") +
+        scale_y_continuous(name = "Value of Improvements\nMade to the Home")
+```
+
+Lastly, create a new variable with the names of the floor material:
+```{r}
+projectData$Floor_Material_Name[projectData$Floor_Material==1] <- "Earth"
+projectData$Floor_Material_Name[projectData$Floor_Material==2] <- "Concrete, Cement, Tiles, Timber"
+```
+
+And create a box plot:
+```{r}
+projectData=projectData[complete.cases(projectData),] 
+p <- ggplot(projectData, aes(Floor_Material_Name,Value_of_Improvements))
+
+p + geom_boxplot() + labs(title="The Value of Improvements by Floor Material")+scale_x_discrete(name = "Floor Material") +
+        scale_y_continuous(name = "Value of Improvements\nMade to the Home")
 ```
 
 Clustering:
