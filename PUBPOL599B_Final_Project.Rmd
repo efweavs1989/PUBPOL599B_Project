@@ -3,6 +3,9 @@
 ## Emma Weaver
 ### March 6, 2018
 ---
+The Living Standards Measurement Study - Integrated Surveys on Agriculture (LSMS-ISA) is a household survey funded by the Gates Foundation and implemented by the World Bank. This representative panel survey is implemented in eight countries, including Tanzania. The survey has a strong focus on agriculture, but includes a variety of other household metrics including those related to Housing, Water and Sanitation, and Finance.The below explores the relationship between variables related to investments in housing and those related to use of mobile money. 
+
+To begin, we download the relevant datasets from GitHub.
 
 Get dataset with region data from GitHub:
 ```{r,eval=TRUE}

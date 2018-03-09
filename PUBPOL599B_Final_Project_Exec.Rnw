@@ -69,7 +69,7 @@ projectData$Region_Code
 projectData$Region_Code=as.numeric(projectData$Region_Code)
 @
 
-  The primary metric of interest is the amount a household spent on improvements to the home in the past year, beyond what was spent on repairs. It is important to understand the relationship with this metric with other, secondary metrics such as the amount spent on repairs, and the use of various mobile money platforms. The below includes summary statistics for these variables. 
+  The primary metric of interest is the amount a household spent on improvements to the home in the past year, beyond what was spent on repairs. It is important to understand the relationship between this metric and other, secondary metrics such as the amount spent on repairs, and the use of various mobile money platforms. The below includes summary statistics for these variables. 
 
 <<meanspread,echo=FALSE,results=tex,eval=TRUE>>=
 library(stargazer)
@@ -78,7 +78,7 @@ stargazer(projectData[,-c(1,7)],title = "Mean and Spread values", label = "measu
   As the table shows, households on average spend more on repairs than improvements. 
   
 \section{Mapping the Data}\label{map}
-  Research suggests that the use of mobile money platforms increases financial inclusion \footnote{http://siteresources.worldbank.org/EXTINFORMATIONANDCOMMUNICATIONANDTECHNOLOGIES/Resources/IC4D-2012-Chapter-4.pdf}. One question asked in the LSMS-ISA survey whether the household has used various mobile money platforms to transfer money in the last 12 months. Given that the use of mobile money is thought to increase financial inclusion, the relationship between the use of mobile money, the amount of money spent on repairs to the home, and the amount beyond this spent on improvements could be interesting. One way to visualize this data is through mapping the data by region. 
+  Research suggests that the use of mobile money platforms increases financial inclusion \footnote{http://siteresources.worldbank.org/EXTINFORMATIONANDCOMMUNICATIONANDTECHNOLOGIES/Resources/IC4D-2012-Chapter-4.pdf}. One question asked in the LSMS-ISA survey is whether the household has used various mobile money platforms to transfer money in the last 12 months. Given that the use of mobile money is thought to increase financial inclusion, the relationship between the use of mobile money, the amount of money spent on repairs to the home, and the amount beyond this spent on improvements could be interesting. One way to visualize this data is through mapping the data by region. 
   
 <<echo=false, results=hide>>=
 compressedMap= "https://github.com/efweavs1989/PUBPOL599B_Project/raw/master/TZA_adm_shp.zip"
